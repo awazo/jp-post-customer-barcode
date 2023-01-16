@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <script src="src/jpcbar.js"></script>
+  <title>japan post customer barcode</title>
+</head>
+<body>
+  <div>
+    <a href="https://github.com/awazo/jp-post-customer-barcode">jp-post-customer-barcode</a> のデモ用ページです。
+  </div>
+  <div>
+    <input type="text" id="code" placeholder="postal-code" value="3170055" />
+<!--
+    <input type="text" id="address" placeholder="address-number" value="6-7-14-2" />
+    <input type="text" id="address" placeholder="address-str" value="6丁目7-14　ABCビル2F" />
+    <input type="text" id="address" placeholder="address-str" value="東3丁目-20-5　郵便・A&bコーポB604号" />
+-->
+    <input type="text" id="address" placeholder="address-str" value="十一丁目六番地一号　郵便タワー601" />
+  </div>
+  <div class="result"></div>
+  <div>
+    <button type="button" id="generate">generate</button>
+  </div>
+  <script>
+    let jpcbar = new Jpcbar();
+    document.getElementById('generate').addEventListener('click', event => {
+      let code = document.getElementById('code').value;
+      let address = document.getElementById('address').value;
+      jpcbar.generate(code, address, document.getElementsByClassName('result'));
+    });
+  </script>
+</body>
+</html>
