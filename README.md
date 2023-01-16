@@ -2,6 +2,7 @@
 郵便カスタマーバーコード生成jsライブラリ
 
 ## 使い方
+srcディレクトリにあるjpcbar.jsを取得して使用してください。
 ```
 <head>
   ...
@@ -23,9 +24,9 @@
   </script>
 </body>
 ```
-address として住所から抽出した住所表示番号を与えることもできる。`jpcbar.generateFromAddressNumber(code, addressNumber, document.getElementsByClassName('result'));` とする。
-生成したコードは第三引数の要素に `data-jpcbarjs-generated` 属性として設定される。
-第三引数を渡さない場合は、以下のオブジェクトを返す。
+address として住所から抽出した住所表示番号を与えることもできます。`jpcbar.generateFromAddressNumber(code, addressNumber, document.getElementsByClassName('result'));` とします。
+生成したコードは第三引数の要素に `data-jpcbarjs-generated` 属性として設定されます。
+第三引数を渡さない場合は、以下のオブジェクトを返します。
 ```
 {
   'code': 生成したコード,
@@ -34,4 +35,4 @@ address として住所から抽出した住所表示番号を与えることも
 ```
 
 ## デモ
-
+[github pages で index.html を見れるようにしています。](https://awazo.github.io/jp-post-customer-barcode/)
