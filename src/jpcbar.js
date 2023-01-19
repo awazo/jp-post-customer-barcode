@@ -3,9 +3,8 @@
 const Jpcbar = function() {
 
   this.generate = function(postalCode, address, targetElements) {
-    if ((postalCode == null) || (typeof postalCode !== 'string')
-        || !/^[0-9]{7}$/.test(postalCode)) {
-      throw 'incorrect postal code';
+    if ((postalCode == null) || !/^[0-9]{7}$/.test(postalCode)) {
+      throw 'incorrect postal code: ' + postalCode;
     }
     if ((address == null) || (typeof address !== 'string')) {
       throw 'incorrect address';
@@ -40,9 +39,8 @@ const Jpcbar = function() {
   };
 
   this.generateFromAddressNumber = function(postalCode, addressNumber, targetElements) {
-    if ((postalCode == null) || (typeof postalCode !== 'string')
-        || !/^[0-9]{7}$/.test(postalCode)) {
-      throw 'incorrect postal code';
+    if ((postalCode == null) || !/^[0-9]{7}$/.test(postalCode)) {
+      throw 'incorrect postal code: ' + postalCode;
     }
     if ((addressNumber == null) || (typeof addressNumber !== 'string')
         || !/^[-0-9A-Z]+$/.test(addressNumber)) {
