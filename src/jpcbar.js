@@ -22,6 +22,7 @@ const Jpcbar = function() {
     let kansuujiRegexp = new RegExp(kansuujiRegexpStr, 'g');
 
     let addressNumber = address.toUpperCase();
+    addressNumber = this.numberZenToHan(addressNumber);
     addressNumber = addressNumber.replaceAll(kansuujiRegexp,
       (match, p1, p2) => { return this.kansuujiToArabic(p1) + p2; });
     addressNumber = addressNumber.replaceAll(/[&\/\.・]/g, '');
@@ -75,6 +76,19 @@ const Jpcbar = function() {
       targetElement.replaceChildren();  // clear children nodes
       targetElement.append(svg.cloneNode(true));
     }
+  };
+
+  this.numberZenToHan = function(target) {
+    return target.replaceAll(/０/g, '0')
+      .replaceAll(/１/g, '1')
+      .replaceAll(/２/g, '2')
+      .replaceAll(/３/g, '3')
+      .replaceAll(/４/g, '4')
+      .replaceAll(/５/g, '5')
+      .replaceAll(/６/g, '6')
+      .replaceAll(/７/g, '7')
+      .replaceAll(/８/g, '8')
+      .replaceAll(/９/g, '9');
   };
 
   this.kansuujiSimple = '〇一二三四五六七八九';
