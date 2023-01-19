@@ -10,6 +10,8 @@ const Jpcbar = function() {
       throw 'incorrect address';
     }
 
+    if (typeof postalCode !== 'string') postalCode = String(postalCode);
+
     if (postalCode.endsWith('00')) {
       console.log('代表の郵便番号(郵便番号簿における"上記に記載がない場合"に該当する郵便番号、下2けた(6～7けた目)が原則として"00")のためカスタマーバーコードの付番なし: ' + postalCode);
       return;
@@ -46,6 +48,8 @@ const Jpcbar = function() {
         || !/^[-0-9A-Z]+$/.test(addressNumber)) {
       throw 'incorrect address number';
     }
+
+    if (typeof postalCode !== 'string') postalCode = String(postalCode);
 
     if (postalCode.endsWith('00')) {
       console.log('代表の郵便番号(郵便番号簿における"上記に記載がない場合"に該当する郵便番号、下2けた(6～7けた目)が原則として"00")のためカスタマーバーコードの付番なし: ' + postalCode);
