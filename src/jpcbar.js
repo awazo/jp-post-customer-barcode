@@ -13,7 +13,7 @@ const Jpcbar = function() {
     if (typeof postalCode !== 'string') postalCode = String(postalCode);
 
     if (postalCode.endsWith('00')) {
-      console.log('代表の郵便番号(郵便番号簿における"上記に記載がない場合"に該当する郵便番号、下2けた(6～7けた目)が原則として"00")のためカスタマーバーコードの付番なし: ' + postalCode);
+      console.log(this.message.daihyoPostalcode + postalCode);
       return;
     }
 
@@ -44,15 +44,15 @@ const Jpcbar = function() {
     if ((postalCode == null) || !/^[0-9]{7}$/.test(postalCode)) {
       throw 'incorrect postal code: ' + postalCode;
     }
-    if ((addressNumber == null) || (typeof addressNumber !== 'string')
-        || !/^[-0-9A-Z]+$/.test(addressNumber)) {
+    if ((addressNumber == null) || !/^[-0-9A-Z]+$/.test(addressNumber)) {
       throw 'incorrect address number';
     }
 
     if (typeof postalCode !== 'string') postalCode = String(postalCode);
+    if (typeof addressNumber !== 'string') addressNumber = String(addressNumber);
 
     if (postalCode.endsWith('00')) {
-      console.log('代表の郵便番号(郵便番号簿における"上記に記載がない場合"に該当する郵便番号、下2けた(6～7けた目)が原則として"00")のためカスタマーバーコードの付番なし: ' + postalCode);
+      console.log(this.message.daihyoPostalcode + postalCode);
       return;
     }
 
@@ -78,6 +78,10 @@ const Jpcbar = function() {
       targetElement.replaceChildren();  // clear children nodes
       targetElement.append(svg.cloneNode(true));
     }
+  };
+
+  this.message = {
+    'daihyoPostalcode': '代表の郵便番号(郵便番号簿における"上記に記載がない場合"に該当する郵便番号、下2けた(6～7けた目)が原則として"00")のためカスタマーバーコードの付番なし: '
   };
 
   this.numberZenToHan = function(target) {
