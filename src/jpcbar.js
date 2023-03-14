@@ -128,6 +128,7 @@ const Jpcbar = function() {
           if (!numArray[numArray.length - 1].isUnit) {
             numArray[numArray.length - 1].value *= num;
             numArray[numArray.length - 1].last = num;
+            numArray[numArray.length - 1].isUnit = true;
           } else if (numArray[numArray.length - 1].isUnit
               && (numArray[numArray.length - 1].last > num)) {
             numArray[numArray.length - 1].value += num;
