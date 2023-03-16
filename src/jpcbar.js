@@ -17,7 +17,7 @@ const Jpcbar = function() {
       return;
     }
 
-    let kansuuji = this.kansuujiSimple + this.kansuujiUnit;
+    let kansuuji = this.kansuujiSimple + this.kansuujiUnit + this.kansuujiScaleUnit;
     let addressSuffix = '丁目|丁|番地|番|号|地割|線|の|ノ';
     let kansuujiRegexpStr = '([' + kansuuji + ']+)(' + addressSuffix + ')';
     let kansuujiRegexp = new RegExp(kansuujiRegexpStr, 'g');
@@ -97,48 +97,142 @@ const Jpcbar = function() {
       .replaceAll(/９/g, '9');
   };
 
+  this.kansuujiUnitType = { "none": 0, "unit": 1, "scale": 2 };
   this.kansuujiSimple = '〇一二三四五六七八九';
   this.kansuujiUnitMap = {
     '十': 10,
     '百': 100,
-    '千': 1000,
+    '千': 1000
+  };
+  this.kansuujiScaleUnitMap = {
     '万': 10000
   };
   this.kansuujiUnit = Object.keys(this.kansuujiUnitMap).join('');
+  this.kansuujiScaleUnit = Object.keys(this.kansuujiScaleUnitMap).join('');
+  /*
+  *_small = unitSize is smaller than last unit/scale (in same type)
+  *_big = unitSize is bigger-equal than last unit/scale (in same type)
+  $ = end of input
+  [Stack/Input table]
+             none, unit_small,  unit_big, scale_small, scale_big,          $
+  Empty:      S00,        S01,       S01,         S02,       S02,        FIN
+    S00:  End+S00,        S03,       S03,         S04,       S04, End+GEmpty
+    S01:      S05,        S06,   End+S01,         S07,       S07, End+GEmpty
+    S02:      S08,        S09,       S09,         S10,   End+S02, End+GEmpty
+    S03: RedM+S05,   RedM+S06,  EndM+S01,    RedM+S07,  RedM+S07,   RedM+G01
+    S04: RedM+S08,   RedM+S09,  RedM+S09,    RedM+S10,  EndM+S02,   RedM+G02
+    S05: EndA+S00,   PopM+S06, Deque+S03,    RedA+S04,  RedA+S04,   RedA+G00
+    S06: RedA+S05,   RedA+S06,  EndA+S01,    RedA+S07,  RedA+S07,   RedA+G01
+    S07: RedM+S08,   RedM+S09,  RedM+S09,    RedM+S10,  EndM+S02,   RedM+G02
+    S08: EndA+S00,   PopM+S09,  PopM+S09,    PopM+S10, Deque+S04,   RedA+G00
+    S09: RedA+S05,   RedA+S06,  EndA+S01,    PopM+S10, Deque+S07,   RedA+G01
+    S10: RedA+S08,   RedA+S09,  RedA+S09,    RedA+S10,  EndA+S02,   RedA+G02
+  S00: [ none ], S01: [ unit ], S02: [ scale ]
+  S03: [ none unit ], S04: [ none scale ]
+  S05: [ unit none ], S06: [ unit unit ], S07: [ unit scale ]
+  S08: [ scale none ], S09: [ scale unit ], S10: [ scale scale ]
+
+(sorted by last elm in stack, stack.length == 2)
+             none, unit_small,  unit_big, scale_small, scale_big,          $
+un  S05: EndA+S00,   PopM+S06, Deque+S03,    RedA+S04,  RedA+S04,   RedA+G00
+sn  S08: EndA+S00,   PopM+S09,  PopM+S09,    PopM+S10, Deque+S04,   RedA+G00
+
+nu  S03: RedM+S05,   RedM+S06,  EndM+S01,    RedM+S07,  RedM+S07,   RedM+G01
+uu  S06: RedA+S05,   RedA+S06,  EndA+S01,    RedA+S07,  RedA+S07,   RedA+G01
+su  S09: RedA+S05,   RedA+S06,  EndA+S01,    PopM+S10, Deque+S07,   RedA+G01
+
+ns  S04: RedM+S08,   RedM+S09,  RedM+S09,    RedM+S10,  EndM+S02,   RedM+G02
+us  S07: RedM+S08,   RedM+S09,  RedM+S09,    RedM+S10,  EndM+S02,   RedM+G02
+ss  S10: RedA+S08,   RedA+S09,  RedA+S09,    RedA+S10,  EndA+S02,   RedA+G02
+
+  Sxx = stack.push(input), goto Sxx
+  Gxx = goto Sxx
+  FIN = parse finished
+  End = Deque
+  EndM = RedM, Deque
+  EndA = RedA, Deque
+  RedM = stack.push(stack.pop * stack.pop)
+  RedA = stack.push(stack.pop + stack.pop)
+  PopM = stack.pop * input
+  Deque = result.push(stack.shift)
+  */
   this.kansuujiToArabic = function(kansuuji) {
     let numArray = [];
+    let stack = [];
+    const reduce = (stack) => {
+      if (stack.length < 2) return;
+      let lastElm = stack.pop();
+      let lastPrevElm = stack.pop();
+      if (lastPrevElm.unitSize > lastElm.unitSize) {
+        lastElm.value += lastPrevElm.value;
+      } else if (lastPrevElm.unitSize < lastElm.unitSize) {
+        lastElm.value *= lastPrevElm.value;
+      } else {
+        stack.push(lastPrevElm);
+        stack.push(lastElm);
+        return;
+      }
+      stack.push(lastElm);
+    };
     for (let kan of kansuuji) {
+      let currentNum = {};
       if (this.kansuujiSimple.indexOf(kan) >= 0) {
-        let num = this.kansuujiSimple.indexOf(kan);
-        if (numArray.length <= 0) {
-          numArray.push({ 'value': num, 'last': num, 'isUnit': false });
-        } else {
-          if (numArray[numArray.length - 1].isUnit) {
-            numArray[numArray.length - 1].value += num;
-            numArray[numArray.length - 1].last = num;
-          } else {
-            numArray.push({ 'value': num, 'last': num, 'isUnit': false });
-          }
+        currentNum.value = this.kansuujiSimple.indexOf(kan);
+        currentNum.unitSize = 1;
+        currentNum.unitType = this.kansuujiUnitType.none;
+      } else if (Object.keys(this.kansuujiUnitMap).includes(kan)) {
+        currentNum.value = this.kansuujiUnitMap[kan];
+        currentNum.unitSize = this.kansuujiUnitMap[kan];
+        currentNum.unitType = this.kansuujiUnitType.unit;
+      } else if (Object.keys(this.kansuujiScaleUnitMap).includes(kan)) {
+        currentNum.value = this.kansuujiScaleUnitMap[kan];
+        currentNum.unitSize = this.kansuujiScaleUnitMap[kan];
+        currentNum.unitType = this.kansuujiUnitType.scale;
+      } else {
+        continue;
+      }
+      // 漢数字「〇」はどれとも合成されないので単独で numArray に入れる
+      if ((currentNum.unitType === this.kansuujiUnitType.none)
+          && (currentNum.value === 0)) {
+        reduce(stack);
+        numArray.push(stack.shift());
+        numArray.push(currentNum);
+        continue;
+      }
+      if (stack.length <= 0) {
+        stack.push(currentNum);
+        continue;
+      }
+      let lastNum = stack.at(-1);
+      let lastPrevNum = stack.at(-2);
+      if (lastPrevNum == null) {
+        if ((lastNum.unitType === currentNum.unitType)
+            && (lastNum.unitSize <= currentNum.unitSize)) {
+          numArray.push(stack.shift());
         }
-      } else if (this.kansuujiUnit.indexOf(kan) >= 0) {
-        let num = this.kansuujiUnitMap[kan];
-        if (numArray.length <= 0) {
-          numArray.push({ 'value': num, 'last': num, 'isUnit': true });
+      } else {
+        if (lastNum.unitType === currentNum.unitType) {
+          reduce(stack);
+          if (lastNum.unitSize <= currentNum.unitSize) {
+            numArray.push(stack.shift());
+          }
         } else {
-          if (!numArray[numArray.length - 1].isUnit) {
-            numArray[numArray.length - 1].value *= num;
-            numArray[numArray.length - 1].last = num;
-            numArray[numArray.length - 1].isUnit = true;
-          } else if (numArray[numArray.length - 1].isUnit
-              && (numArray[numArray.length - 1].last > num)) {
-            numArray[numArray.length - 1].value += num;
-            numArray[numArray.length - 1].last = num;
+          if ((lastPrevNum.unitType === currentNum.unitType)
+              && (lastPrevNum.unitSize > lastNum.unitSize)) {
+            if (lastPrevNum.unitSize > currentNum.unitSize) {
+              currentNum.value *= stack.pop().value;
+            } else {
+              numArray.push(stack.shift());
+            }
           } else {
-            numArray.push({ 'value': num, 'last': num, 'isUnit': true });
+            reduce(stack);
           }
         }
       }
+      stack.push(currentNum);
     }
+    reduce(stack);
+    numArray.push(stack.shift());
     return numArray.reduce((acc, curr) => acc + String(curr.value), '');
   };
 
