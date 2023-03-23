@@ -1,5 +1,6 @@
 # jp-post-customer-barcode
 郵便カスタマーバーコード生成jsライブラリ
+* 住所からも住所表示番号からもバーコード生成ができて、漢数字を算用数字に変換する処理も入っているなど、郵便局の仕様をほぼ網羅できているライブラリです。
 
 ## 使い方
 srcディレクトリにあるjpcbar.jsを取得して使用してください。
@@ -36,3 +37,7 @@ address として住所から抽出した住所表示番号を与えることも
 
 ## デモ
 [github pages で index.html を見れるようにしています。](https://awazo.github.io/jp-post-customer-barcode/)
+
+## 作成者による説明記事
+[zenn](https://zenn.dev/awazo/articles/jp-post-customer-barcode) にて説明する記事を書きましたので、ご参照ください。
+
